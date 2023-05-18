@@ -1,18 +1,14 @@
-import pandas as pd
-import numpy as np
-
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Embedding
-from tensorflow.keras.layers import LSTM
-from sklearn.preprocessing import StandardScaler
-from sklearn.preprocessing import MinMaxScaler
 import math
-from tensorflow.python.keras.layers.core import Dense, Dropout, Activation
-from sklearn.metrics import mean_squared_error
-from sklearn.metrics import mean_absolute_error
+
 import matplotlib.pyplot as plt
-from matplotlib import image as mpimg
-import matplotlib
+import numpy as np
+import pandas as pd
+from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import mean_squared_error
+from sklearn.preprocessing import MinMaxScaler
+from tensorflow.python.keras import Sequential
+from tensorflow.python.keras.layers import LSTM
+from tensorflow.python.keras.layers.core import Dense, Dropout
 
 
 def generate_model_data(data_path, alpha, days):
@@ -88,11 +84,11 @@ def lstm_model(X_train, Y_train, X_test, Y_test):
 
 
 if __name__ == '__main__':
-    data_path = '../develop_data/lstm_data/无舆情测试数据.csv'
+    data_path = '../../develop_data/lstm_data/无舆情测试数据.csv'
     days = 5
     alpha = 0.25
     scaler = MinMaxScaler(feature_range=(0, 1))
-    X_train, Y_train, X_test, Y_test = generate_model_data('../develop_data/lstm_data/无舆情测试数据.csv', alpha, days)
+    X_train, Y_train, X_test, Y_test = generate_model_data('../../develop_data/lstm_data/无舆情测试数据.csv', alpha, days)
     train_Y, trainPredict, test_Y, testPredict = lstm_model(X_train, Y_train, X_test, Y_test)
     plt.figure(figsize=(5, 5))
     plt.rcParams['font.sans-serif'] = ['SimSun']

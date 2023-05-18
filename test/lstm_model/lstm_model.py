@@ -1,18 +1,14 @@
-import pandas as pd
-import numpy as np
-
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Embedding
-from tensorflow.keras.layers import LSTM
-from sklearn.preprocessing import StandardScaler
-from sklearn.preprocessing import MinMaxScaler
 import math
-from tensorflow.python.keras.layers.core import Dense, Dropout, Activation
-from sklearn.metrics import mean_squared_error
-from sklearn.metrics import mean_absolute_error
+
 import matplotlib.pyplot as plt
-from matplotlib import image as mpimg
-import matplotlib
+import numpy as np
+import pandas as pd
+from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import mean_squared_error
+from sklearn.preprocessing import MinMaxScaler
+from tensorflow.python.keras.layers import LSTM
+from tensorflow.python.keras.layers.core import Dense, Dropout
+from tensorflow.python.keras.models import Sequential
 
 
 def generate_model_data(data_path,alpha,days):
@@ -68,7 +64,7 @@ def lstm_model(X_train, Y_train, X_test, Y_test):
     model.add(LSTM(units=30, return_sequences=False))
     model.add(Dropout(d))#建立的遗忘层
     #model.add(LSTM(units=10, input_shape=(X_train.shape[1], X_train.shape[2])))
-   #model.add(Dropout(d))#建立的遗忘层
+    #model.add(Dropout(d))#建立的遗忘层
     model.add(Dense(1, activation='tanh'))    #hard_sigmoid   tanh
     model.compile(loss='mean_squared_error', optimizer='adam')
     model.fit(X_train, Y_train, epochs=300, batch_size=20, verbose=1)
@@ -83,11 +79,11 @@ def lstm_model(X_train, Y_train, X_test, Y_test):
 
     return Y_train, trainPredict, Y_test, testPredict
 if __name__=='__main__':
-    data_path = '../develop_data/lstm_data/无舆情测试数据.csv'
+    data_path = '无舆情测试数据.csv'
     days = 5
     alpha = 0.25
     scaler = MinMaxScaler(feature_range=(0, 1))
-    X_train, Y_train, X_test, Y_test = generate_model_data('../develop_data/lstm_data/无舆情测试数据.csv', alpha, days)
+    X_train, Y_train, X_test, Y_test = generate_model_data('无舆情测试数据.csv', alpha, days)
     train_Y, trainPredict, test_Y, testPredict  = lstm_model(X_train, Y_train, X_test, Y_test)
     plt.figure(figsize=(5,5))
     plt.rcParams['font.sans-serif']=['SimSun']
