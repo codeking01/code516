@@ -24,7 +24,7 @@ from sklearn.metrics import classification_report
 # 划分训练集和测试集
 from sklearn.model_selection import train_test_split
 
-train, test = train_test_split(data, test_size=0.3)
+train, test = train_test_split(data, test_size=0.3,random_state=42)
 
 train_X = train.drop('ST是否', axis=1)
 train_y = train.ST是否
@@ -33,7 +33,7 @@ test_y = test.ST是否
 
 # 构建CNN模型
 model = Sequential()
-model.add(Conv1D(64, 3, activation='relu', input_shape=(train_X.shape[1], 1)))
+model.add(Conv1D(128, 3, activation='relu', input_shape=(train_X.shape[1], 1)))
 model.add(MaxPooling1D(pool_size=2))
 model.add(Flatten())
 model.add(Dense(50, activation='relu'))
@@ -84,3 +84,15 @@ plt.plot(fpr, tpr, 'r', label='Logistic AUC = %0.3f' % roc_auc)
 plt.plot([0, 1], [0, 1], 'r--')
 plt.legend()
 plt.show()
+
+#  0.7070063694267515 0.6464968152866242
+
+def save_model():
+    from joblib import dump, load
+    # 假设你的模型对象为model
+    # 保存模型到文件
+    dump(model, 'model.joblib')
+    print("模型已保存到 model.joblib")
+    # 加载模型
+    model1 = load('model.joblib')
+    print("模型已加载")
