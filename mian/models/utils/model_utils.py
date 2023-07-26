@@ -1,17 +1,23 @@
 # @author: code_king
-# @date: 2023/7/20 21:00
+# @date: 2023/7/26 20:06
+import uuid
+
 import joblib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from keras import Sequential
-from keras.layers import Conv1D, MaxPooling1D, Flatten, Dense, Dropout
 from sklearn import metrics
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
 
-def dimensionality_reduction(correlation_threshold=0.7):
+def dimensionality_reduction(x_data=None, y_data=None, correlation_threshold=0.7):
+    """
+    :param y_data:
+    :param x_data:
+    :param correlation_threshold:相关性值阈值
+    :return:
+    """
     # 计算特征之间的相关性矩阵
     corr_matrix = np.abs(np.corrcoef(x_data, rowvar=False))
     # 设置相关性的阈值，根据需要进行调整
@@ -33,25 +39,12 @@ def dimensionality_reduction(correlation_threshold=0.7):
     return features_to_drop
 
 
-def get_develop_model():
-    develop_models = Sequential()
-    develop_models.add(Conv1D(256, 3, activation='relu', input_shape=(x_train.shape[1], 1)))
-    develop_models.add(MaxPooling1D(pool_size=2))
-    develop_models.add(Conv1D(128, 3, activation='relu'))
-    develop_models.add(MaxPooling1D(pool_size=2))
-    develop_models.add(Flatten())
-    develop_models.add(Dense(512, activation='relu'))
-    develop_models.add(Dropout(0.2))
-    develop_models.add(Dense(256, activation='relu'))
-    develop_models.add(Dropout(0.2))
-    develop_models.add(Dense(1, activation='sigmoid'))
-    # sigmoid激活函数的范围是0到1之间的连续值,表示该样本属于正类的概率。
-    develop_models.compile(loss='binary_crossentropy', optimizer="adam", metrics=['accuracy'])
-    return develop_models
-
-
-def batch_train(max_epochs=20, stop_accuracy=0.8, epochs=10, batch_size=32, features_to_drop=None):
+def batch_train(model=None, model_name=uuid.uuid4(), data_list=None, max_epochs=20, stop_accuracy=0.8, epochs=10,
+                batch_size=32, features_to_drop=None):
     """
+    :param model_name: 模型名称
+    :param data_list: 训练集和测试集
+    :param model:
     :param features_to_drop: 降维需要删除的列
     :param epochs:
     :param batch_size:
@@ -60,11 +53,12 @@ def batch_train(max_epochs=20, stop_accuracy=0.8, epochs=10, batch_size=32, feat
     :return:
     """
     accuracy = 0
+    train_x, test_x, y_train, y_test = data_list
     for epoch in range(max_epochs):
-        history_model = model.fit(train_X, y_train, epochs=epochs, batch_size=batch_size,
-                                  validation_data=(test_X, y_test), verbose=0)
+        history_model = model.fit(train_x, y_train, epochs=epochs, batch_size=batch_size,
+                                  validation_data=(test_x, y_test), verbose=0)
         # 模型评估
-        pred_y_prob = model.predict(test_X)
+        pred_y_prob = model.predict(test_x)
         pred_value = (pred_y_prob > 0.5).astype("int32")
         accuracy = max(accuracy, metrics.accuracy_score(pred_value, y_test))
         print(f"Epoch: {epoch + 1} - Accuracy: {accuracy}")
@@ -72,7 +66,7 @@ def batch_train(max_epochs=20, stop_accuracy=0.8, epochs=10, batch_size=32, feat
         # 当准确率超过阈值时保存模型
         if accuracy > stop_accuracy:
             models = {"features_to_drop": features_to_drop, "model": model}
-            joblib.dump(models, 'models.joblib')
+            joblib.dump(models, f'../save_models/{model_name}.joblib')
             print("Model saved.")
             return history_model, pred_y_prob
     raise Exception(f"Stop training, accuracy is too low, accuracy: {accuracy}")
@@ -129,48 +123,19 @@ def get_data(filepath=None):
     del data['上市公司代码_Comcd']
     return data
 
-
-data = get_data("../data/财务指标36.xlsx")
-x_data = data.drop("ST是否", axis=1)
-y_data = data.ST是否
-
-# 处理x_data, 做一个标准化处理
-scaler = StandardScaler()
-x_data = scaler.fit_transform(x_data)
-
-# 降维找出相关性过高的列,保存到model中，后续需要用
-features_to_drop = dimensionality_reduction()
-
-# 从数据集中删除高度相关的特征
-x_data_reduced = np.delete(x_data, list(features_to_drop), axis=1)
-
-# 划分训练集和测试集
-x_train, x_test, y_train, y_test = train_test_split(x_data_reduced, y_data, test_size=0.2, random_state=42)
-
-# 调整输入格式
-train_X = x_train.reshape(-1, x_train.shape[1], 1)
-test_X = x_test.reshape(-1, x_test.shape[1], 1)
-
-model = get_develop_model()
-# 开始训练的死循环
-history, y_pred_prob = batch_train(max_epochs=1000, stop_accuracy=0.8, epochs=30, batch_size=32)
-drawing(y_test, y_pred_prob, history)
-
-# 测试集 accuracy: 0.8516746411483254
-
-# 定义要调整的超参数的网格
-# from sklearn.model_selection import GridSearchCV
-# from keras.wrappers.scikit_learn import KerasClassifier
-# param_grid = {
-#     'epochs': [10, 20],
-#     'batch_size': [32, 64],
-#     'optimizer': ['adam', 'rmsprop']
-# }
-#
-# # 使用GridSearchCV对超参数进行网格搜索
-# grid = GridSearchCV(estimator=model, param_grid=param_grid, cv=3)
-# grid_result = grid.fit(x_train, y_train)
-#
-# # 打印最佳参数和得分
-# print("Best parameters: ", grid_result.best_params_)
-# # print("Best score: ", grid_result.best_score_)
+def get_train_test_data(data=None):
+    """
+    :param data:
+    :return:
+    """
+    x_data = data.drop("ST是否", axis=1)
+    y_data = data.ST是否
+    # 处理x_data, 做一个标准化处理
+    scaler = StandardScaler()
+    x_data = scaler.fit_transform(x_data)
+    # 降维找出相关性过高的列,保存到model中，后续需要用
+    features_to_drop = dimensionality_reduction(x_data, y_data, correlation_threshold=0.7)
+    # 从数据集中删除高度相关的特征
+    x_data_reduced = np.delete(x_data, list(features_to_drop), axis=1)
+    # 划分训练集和测试集
+    return train_test_split(x_data_reduced, y_data, test_size=0.2, random_state=42)
