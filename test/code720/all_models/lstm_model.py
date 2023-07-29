@@ -53,18 +53,18 @@ print("Accuracy:", metrics.accuracy_score(pred, test_y))
 print(classification_report(test_y, pred))
 
 # 绘制训练曲线
-# history = model.fit(train_X, train_y, epochs=70, batch_size=32, validation_data=(test_X, test_y))
+# history_model = model.fit(train_X, train_y, epochs=70, batch_size=32, validation_data=(test_X, test_y))
 
-plt.plot(history.history['loss'])
-plt.plot(history.history['val_loss'])
+plt.plot(history.history_model['loss'])
+plt.plot(history.history_model['val_loss'])
 plt.title('Model Loss')
 plt.ylabel('Loss')
 plt.xlabel('Epoch')
 plt.legend(['Train', 'Validation'], loc='upper left')
 plt.show()
 
-plt.plot(history.history['accuracy'])
-plt.plot(history.history['val_accuracy'])
+plt.plot(history.history_model['accuracy'])
+plt.plot(history.history_model['val_accuracy'])
 plt.title('Model Accuracy')
 plt.ylabel('Accuracy')
 plt.xlabel('Epoch')

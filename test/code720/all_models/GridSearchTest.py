@@ -3,7 +3,7 @@
 import pandas as pd
 from keras import Sequential
 from keras.layers import LSTM, Dropout, Dense
-from keras.wrappers.scikit_learn import KerasClassifier
+from scikeras.wrappers import KerasClassifier
 from sklearn import metrics
 from sklearn.metrics import classification_report
 import matplotlib.pyplot as plt
@@ -71,16 +71,16 @@ print("Accuracy:", metrics.accuracy_score(pred, test_y))
 print(classification_report(test_y, pred))
 
 # 绘制训练曲线
-plt.plot(history.history['loss'])
-plt.plot(history.history['val_loss'])
+plt.plot(history.history_model['loss'])
+plt.plot(history.history_model['val_loss'])
 plt.title('Model Loss')
 plt.ylabel('Loss')
 plt.xlabel('Epoch')
 plt.legend(['Train', 'Validation'], loc='upper left')
 plt.show()
 
-plt.plot(history.history['accuracy'])
-plt.plot(history.history['val_accuracy'])
+plt.plot(history.history_model['accuracy'])
+plt.plot(history.history_model['val_accuracy'])
 plt.title('Model Accuracy')
 plt.ylabel('Accuracy')
 plt.xlabel('Epoch')
